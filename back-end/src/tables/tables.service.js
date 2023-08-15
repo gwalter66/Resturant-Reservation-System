@@ -1,62 +1,63 @@
 const knex = require("../db/connection");
 
-
-/** creates a new table (row) */
 function create(table) {
   return knex("tables")
     .insert(table)
-    .returning("*");
+    .returning("*")
+    .then((createdRecord) => createdRecord[0]);
 }
 
-/** reads a table given the table_id */
+function list() {
+  return knex("tables").select("*").orderBy("table_name", "asc");
+}
+
 function read(table_id) {
   return knex("tables")
     .select("*")
     .where({ table_id: table_id })
-    .first();
+    .then((selectedResults) => selectedResults[0]);
 }
 
-/** updates reservation status given the reservation_id */
-function updateReservation(reservation_id, status) {
-  return knex("reservations")
-    .where({ reservation_id: reservation_id })
-    .update({ status: status });
-}
-
-/** lists all tables. */
-function list() {
+function update(updatedTable) {
   return knex("tables")
     .select("*")
-    .orderBy("table_name");
+    .where({ table_id: updatedTable.table_id })
+    .update(updatedTable, "*")
+    .then((updatedRecord) => updatedRecord[0]);
 }
 
-
-/** reads reservation given the reservation_id. */
 function readReservation(reservation_id) {
   return knex("reservations")
     .select("*")
     .where({ reservation_id: reservation_id })
-    .first();
+    .then((selectedResults) => selectedResults[0]);
 }
 
-function occupy(table_id, reservation_id) {
-  return knex("tables")
-    .where({ table_id: table_id })
-    .update({ reservation_id: reservation_id, status: "occupied" });
+function destroy(table_id) {
+  return knex("tables").where({ table_id }).del();
 }
 
-function free(table_id) {
+function deleteSeatAssignment(table_id) {
   return knex("tables")
-    .where({ table_id: table_id })
-    .update({ reservation_id: null, status: "free" });
+    .select("*")
+    .where({ table_id })
+    .update({ reservation_id: null });
+}
+
+function updateStatus(reservationId, status) {
+  return knex("reservations")
+    .where({ reservation_id: reservationId })
+    .update({ status: status }, "*")
+    .then((updated) => updated[0]);
 }
 
 module.exports = {
-  list,
   create,
+  list,
+  update,
   read,
-  occupy,
-  free,
   readReservation,
-  updateReservation,
+  destroy,
+  deleteSeatAssignment,
+  updateStatus,
 };

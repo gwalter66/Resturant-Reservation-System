@@ -1,170 +1,104 @@
-import React, { useState } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
-import formatPhoneNumber from "../utils/phoneNumberFormatter";
 
-
-
-
-// Displays a Reservation Form used to create or edit a reservation
-const ReservationForm = ({
-  handleSubmit, 
-  initialState = {
-    first_name: "",
-    last_name: "",
-    mobile_number: "",
-    reservation_date: "",
-    reservation_time: "",
-    people: "",
-  }
-}) => {
-  
-  
+function ReservationForm({ formData, changeHandler, submitHandler }) {
   const history = useHistory();
 
-
-  // Set formData default state to initialState variable
-  const [formData, setFormData] = useState(initialState);
-
-
-
-  // Updates the state of the form whenever the user makes changes to it
-  function handleChange({ target }) {
-    setFormData({
-      ...formData,
-      [target.name]:
-        target.name === "people" ? Number(target.value) : target.value,
-    });
-  }  
-
-
-  let phoneNumberFormatter = ({ target }) => {
-    const formattedInputValue = formatPhoneNumber(target.value);
-    setFormData({
-      ...formData,
-      mobile_number: formattedInputValue,
-    });
-  };
-
-
-
-
   return (
-    <div className='row justify-content-center'>
-      <form
-        className='col-lg-10'
-        onSubmit={ (e) => {
-          e.preventDefault();
-          handleSubmit(formData);
-        }}>
-
-        
-        <div className='form-group'>
-          <label>First Name</label>
-          <input
-            className='form-control'
-            id="first_name"
+    <div>
+      <form>
+        <label htmlFor="first_name">
+          First Name:
+          <input className="form-control"
+            type="text"
             name="first_name"
-            type="text"
+            id="first_name"
             value={formData.first_name}
-            placeholder="Enter your first name"
-            required={true}
-            onChange={handleChange}
+            onChange={changeHandler}
+            required
           />
-        </div>
-
-        <div className='form-group'>
-          <label>Last Name</label>
-          <input
-            className='form-control'
-            id="last_name"
+        </label>
+        <br />
+        <label htmlFor="last_name">
+          Last Name:
+          <input className="form-control"
+            type="text"
             name="last_name"
-            type="text"
+            id="last_name"
             value={formData.last_name}
-            placeholder="Enter your last name"
-            required={true}
-            onChange={handleChange}
+            onChange={changeHandler}
+            required
           />
-        </div>
-
-        <div className='form-group'>
-          <label>Mobile Number</label>
-          <input
-            className='form-control'
-            id="mobile_number"
-            name="mobile_number"
+        </label>
+        <br />
+        <label htmlFor="mobile_number">
+          Mobile Number:
+          <input className="form-control"
             type="tel"
+            name="mobile_number"
+            id="mobile_number"
             value={formData.mobile_number}
-            placeholder="xxx-xxx-xxxx"
-            pattern="([0-9]{3}-)?[0-9]{3}-[0-9]{4}"
-            required={true}
-            onChange={phoneNumberFormatter}
+            onChange={changeHandler}
+            required
           />
-        </div>
-
-        <div className='form-group'>
-          <label>Reservation Date</label>
-          <input
-            className='form-control'
-            id="reservation_date"
-            name="reservation_date"
+        </label>
+        <br />
+        <label htmlFor="reservation_date">
+          Reservation Date:
+          <input className="form-control"
             type="date"
+            placeholder="YYYY-MM-DD"
             pattern="\d{4}-\d{2}-\d{2}"
+            name="reservation_date"
+            id="reservation_date"
             value={formData.reservation_date}
-            required={true}
-            onChange={handleChange}
+            onChange={changeHandler}
+            required
           />
-        </div>
-
-        <div className='form-group'>
-          <label>Reservation Time</label>
-          <input
-            className='form-control'
-            id="reservation_time"
-            name="reservation_time"
+        </label>
+        <br />
+        <label htmlFor="reservation_time">
+          Reservation Time:
+          <input className="form-control"
             type="time"
+            placeholder="HH:MM"
             pattern="[0-9]{2}:[0-9]{2}"
+            name="reservation_time"
+            id="reservation_time"
             value={formData.reservation_time}
-            required={true}
-            onChange={handleChange}
+            onChange={changeHandler}
+            required
           />
-        </div>
-
-        <div className='form-group'>
-          <label>Party Size</label>
-          <input
-            className='form-control'
-            id="people"
+        </label>
+        <br />
+        <label htmlFor="people">
+          Party Size:
+          <input className="form-control"
+            type="number"
             name="people"
-            type="text"
+            id="people"
             value={formData.people}
-            placeholder="Please enter your party's size"
-            required={true}
-            onChange={handleChange}
+            onChange={changeHandler}
+            required
           />
-        </div>
-
-        <div className='form-group'>
-          <button
-            className="btn btn-xs btn-dark btn-outline-light w-10"
-            type="submit"
-          >
-            Submit
-          </button>
-
-          <button
-            className="btn btn-xs btn-cancel text-dark btn-outline-light mx-2 w-10"
-            type="button"
-            onClick={() => history.goBack()}
-          >
-            Cancel
-          </button>
-        </div>
-
+        </label>
+        <br />
+        <button
+          className="btn btn-outline-danger btn-sm mr-1"
+          onClick={() => history.push("/")}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="btn btn-outline-primary btn-sm"
+          onClick={(event) => submitHandler(event)}
+        >
+          Submit
+        </button>
       </form>
     </div>
-  )
-
+  );
 }
-
 
 export default ReservationForm;

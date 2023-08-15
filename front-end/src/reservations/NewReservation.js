@@ -1,61 +1,62 @@
 import React, { useState } from "react";
+import ReservationForm from "./ReservationForm";
+import { createReservation } from "../utils/api";
 import { useHistory } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
-import { createReservation } from "../utils/api";
-import { validateDate, validateFields }from "./validateDate";
-import ReservationForm from "./ReservationForm";
 
-
-
-// Displays a Reservation Form used to create or edit a reservation
-const NewReservation = ({ loadDashboard }) => {
-
+function NewReservation() {
   const history = useHistory();
 
-  // const [errors, setErrors] = useState([]);
-  const [errors, setErrors] = useState([]);
-  const [apiError, setApiError] = useState(null);
-  
+  const initialFormState = {
+    first_name: "",
+    last_name: "",
+    mobile_number: "",
+    reservation_date: "",
+    reservation_time: "",
+    people: "1",
+    status: "booked",
+  };
+  const [formData, setFormData] = useState({ ...initialFormState });
+  const [errorAlert, setErrorAlert] = useState(false);
 
+  //Handlers
+  const changeHandler = ({ target }) => {
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [target.name]: target.value,
+    }));
+  };
 
-  function handleSubmit(sumbmittedFormData) {
+  const submitHandler = async (event) => {
+    event.preventDefault();
     const abortController = new AbortController();
-    const foundErrors = [];
-
-    if (validateDate(sumbmittedFormData, foundErrors) && validateFields(sumbmittedFormData, foundErrors)) {
-
-        createReservation(sumbmittedFormData, abortController.signal)
-          .then(loadDashboard)
-          .then(() =>
-            history.push(`/dashboard?date=${sumbmittedFormData.reservation_date}`)
-          )
-          .catch(setApiError);
+    try {
+      const response = await createReservation(
+        formData,
+        abortController.signal
+      );
+      history.push(
+        `/dashboard/?date=${response.reservation_date.slice(0, 10)}`
+      );
+    } catch (error) {
+      setErrorAlert(error);
     }
-    setErrors(foundErrors);
-    return () => abortController.abort();
   };
-
-
-
-  const errorsJSX = () => {
-    return errors.map((error, idx) => <ErrorAlert key={idx} error={error} />);
-  };
-
-
-
-
   return (
-    <main>
-        <h1 className='text-center py-4'>New Reservation</h1>
-
-        {errorsJSX()}
-        <ErrorAlert error={apiError} />
-
-        <ReservationForm handleSubmit={handleSubmit} />
-    </main>
-  )
-
+    <div>
+      <div>
+        <h1>New Reservation</h1>
+      </div>
+      <div>
+        <ErrorAlert error={errorAlert} />
+        <ReservationForm
+          formData={formData}
+          changeHandler={changeHandler}
+          submitHandler={submitHandler}
+        />
+      </div>
+    </div>
+  );
 }
-
 
 export default NewReservation;

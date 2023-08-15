@@ -1,10 +1,17 @@
-import React from "react";
-import { getDisplayDate } from "../utils/date-time";
+import React, { useEffect, useState } from "react";
+import {
+  listReservations,
+  listTables,
+  finishTable,
+  changeReservationStatus,
+} from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import Buttons from "./Buttons";
-import DisplayReservation from "../reservations/DisplayReservation";
-import DisplayTable from "../tables/DisplayTable";
-
+import ListReservations from "./ListReservations";
+import useQuery from "../utils/useQuery";
+import { today } from "../utils/date-time";
+import { previous, next } from "../utils/date-time";
+import { Link, useHistory } from "react-router-dom";
+import ListTables from "./ListTables";
 
 /**
  * Defines the dashboard page.
@@ -12,70 +19,101 @@ import DisplayTable from "../tables/DisplayTable";
  *  the date for which the user wants to view reservations.
  * @returns {JSX.Element}
  */
+function Dashboard() {
+  const history = useHistory();
+  const [reservations, setReservations] = useState([]);
+  const [reservationsError, setReservationsError] = useState(null);
+  const [tables, setTables] = useState([]);
+  const [tablesError, setTablesError] = useState([]);
+  const [cancelError, setCancelError] = useState(null);
 
-// {JSON.stringify(reservations)}
+  //If date is not given, should preform get request with today's date.
+  let date = today();
+  const query = useQuery().get("date");
+  if (query) {
+    date = query;
+  }
 
-function Dashboard({ date, setDate, reservations, reservationsError, tables, tablesError, loadDashboard }) {
-  
-  // display date formatted as Friday, January 1, 2021
-  const displayDate = getDisplayDate(date);
+  useEffect(loadDashboard, [date]);
 
-  // iterates each reservation and calls 'DisplayReservation' to display a single reservation
-  const reservationsJSX = () => {
-    return reservations.map((reservation) => (
-      <DisplayReservation
-        key={reservation.reservation_id}
-        reservation={reservation}
-        loadDashboard={loadDashboard}
-      />
-    ))
-  };
+  //load reservations and tables
 
+  function loadDashboard() {
+    const abortController = new AbortController();
+    setReservationsError(null);
+    setTablesError(null);
+    listReservations({ date }, abortController.signal)
+      .then(setReservations)
+      .catch(setReservationsError);
+    listTables(abortController.signal).then(setTables).catch(setTablesError);
+    return () => abortController.abort();
+  }
 
-  const tablesJSX = () => {
-    return tables.map((table) => (
-      <DisplayTable
-        key={table.table_id}
-        table={table}
-        loadDashboard={loadDashboard}
-      />
-    ))
-  };
+  //handler for finish button
 
+  async function finishHandler({ table_id, reservation_id }) {
+    const confirmationWindow = window.confirm(
+      "Is this table ready to seat new guests? This cannot be undone."
+    );
+    if (confirmationWindow) {
+      try {
+        await finishTable(table_id);
+        await changeReservationStatus(reservation_id, "finished");
+      } catch (error) {
+        setTablesError([error]);
+      }
 
+      history.push("/");
+    }
+  }
+
+  async function cancelHandler({ reservation_id }) {
+    const confirmationWindow = window.confirm(
+      "Do you want to cancel this reservation? This cannot be undone."
+    );
+    if (confirmationWindow) {
+      try {
+        await changeReservationStatus(reservation_id, "cancelled");
+      } catch (error) {
+
+        setCancelError([error]);
+      }
+
+      history.push("/");
+    }
+  }
 
   return (
     <main>
-      <h1 className="text-center">Dashboard</h1>
-
-      <div className="text-center">
-        <h3 className="text-center">{displayDate}</h3>
+      <h1>Dashboard</h1>
+      <div className="d-md-flex mb-3">
+        <h4 className="mb-0">Reservations for date</h4>
       </div>
-
-      <div className="text-center">
-          <Buttons date={date} setDate={setDate} />
+      <div className="container">
+        <Link
+          to={`/dashboard/?date=${previous(date)}`}
+          className="btn btn-dark"
+        >
+          Previous
+        </Link>
+        <Link to={`/dashboard`} className="btn btn-light">
+          Today
+        </Link>
+        <Link to={`/dashboard/?date=${next(date)}`} className="btn btn-dark">
+          Next
+        </Link>
       </div>
-
+      <br />
       <ErrorAlert error={reservationsError} />
       <ErrorAlert error={tablesError} />
-      
-      <div>
-        <h3>Reservations:</h3>
-        <div>
-          <div>{reservationsJSX()}</div>
-          <div className="text-center">
-            {reservations.length === 0 && (
-              <h5 className="text-center row flex-column bg-light border rounded-lg mx-1 my-3 px-2 py-2">There are no reservations for today</h5>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5">
-        <h3>Tables:</h3>
-        <div>{tablesJSX()}</div>
-      </div>
-      
+      <ErrorAlert error={cancelError} />
+      <ListReservations
+        reservations={reservations}
+        date={date}
+        cancelHandler={cancelHandler}
+      />
+      <br />
+      <ListTables tables={tables} finishHandler={finishHandler} />
     </main>
   );
 }

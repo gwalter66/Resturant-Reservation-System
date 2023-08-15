@@ -1,124 +1,60 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
-// import ErrorAlert from "../layout/ErrorAlert";
+import TableForm from "./TableForm";
 import { createTable } from "../utils/api";
+import { useHistory } from "react-router-dom";
+import ErrorAlert from "../layout/ErrorAlert";
 
-
-// Returns a 'NewTable' form to create a new table that sits an entered quantity
-export default function NewTable({ loadDashboard }) {
-
-
+function NewTable() {
   const history = useHistory();
 
-  // const [error, setError] = useState([]);
-  /** sets initial state of a table */
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     table_name: "",
-    capacity: "",
-  });
+    capacity: "1",
+  };
+  const [formData, setFormData] = useState({ ...initialFormState });
+  const [errorAlert, setErrorAlert] = useState(false);
 
+  //Handlers
+  const changeHandlerName = ({ target }) => {
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [target.name]: target.value,
+    }));
+  };
 
-  /* sets table info when entered */
-  function handleChange({ target }) {
-    setFormData({
-      ...formData,
-      [target.name]:
-        target.name === "capacity" ? Number(target.value) : target.value,
-    });
-  }
+  const changeHandlerCapacity = ({ target }) => {
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [target.name]: Number(target.value),
+    }));
+  };
 
-
-  /* saves table info and redirects to dashboard when form is submitted */
-  function handleSubmit(event) {
+  const submitHandler = async (event) => {
     event.preventDefault();
     const abortController = new AbortController();
-
-    if (validateFields()) {
-      createTable(formData, abortController.signal)
-        .then(loadDashboard)
-        .then(() => history.push(`/dashboard`));
-        // .catch(setError);
+    try {
+      await createTable(formData, abortController.signal);
+      history.push(`/dashboard`);
+    } catch (error) {
+      setErrorAlert(error);
     }
-
-    return () => abortController.abort();
-  }
-
-
-  /* checks for table's capacity and length of table's name */
-  function validateFields() {
-    let foundError = null;
-
-    if (formData.table_name === "" || formData.capacity === "") {
-      foundError = {
-        message:
-          "invalid form: table name & capacity must be provided to create table",
-      };
-    } else if (formData.table_name.length < 2) {
-      foundError = {
-        message:
-          "invalid table name: table name must contain at least two characters",
-      };
-    }
-
-    // setError(foundError);
-    return foundError === null;
-  }
-
-
-
+  };
   return (
-    <div className='row justify-content-center'>
-        <form className='col-lg-10' onSubmit={handleSubmit}>
-            <h1 className='text-center py-4'>New Table</h1>
-            {/* <ErrorAlert error={error} /> */}
-            <div className='form-group'>
-                <label htmlFor="table_name">Table Name</label>
-                <input
-                    name="table_name"
-                    id="table_name"
-                    className="form-control"
-                    type="text"
-                    minLength="2"
-                    onChange={handleChange}
-                    value={formData.table_name}
-                    placeholder="Enter table name"
-                    required
-                />
-            </div>
-
-            <div className='form-group'>
-                <label htmlFor="capacity">Table Capacity</label>
-                <input
-                    name="capacity"
-                    id="capacity"
-                    placeholder='Enter seating capacity'
-                    className="form-control"
-                    type="number"
-                    // min="1"
-                    onChange={handleChange}
-                    value={formData.capacity}
-                    required
-                />
-            </div>
-
-            <div className='form-group'>
-                <button
-                    className="btn btn-xs btn-dark btn-outline-light w-10"
-                    type="submit"
-                >
-                    Submit
-                </button>
-
-                <button
-                    className="btn btn-xs btn-cancel text-dark btn-outline-light mx-2 w-10"
-                    type="button"
-                    onClick={history.goBack}
-                >
-                    Cancel
-                </button>
-            </div>
-
-        </form>
+    <div>
+      <div>
+        <h1>New Table</h1>
+      </div>
+      <div>
+        <ErrorAlert error={errorAlert} />
+        <TableForm
+          formData={formData}
+          changeHandlerName={changeHandlerName}
+          changeHandlerCapacity={changeHandlerCapacity}
+          submitHandler={submitHandler}
+        />
+      </div>
     </div>
   );
 }
+
+export default NewTable;
