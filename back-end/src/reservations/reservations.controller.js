@@ -73,6 +73,19 @@ function dateIsValid(req, res, next) {
   });
 }
 
+function phoneIsValid(req, res, next) {
+  const { mobile_number } = req.body.data;
+  const isPhoneNumber = mobile_number.match(/^[1-9]\d{2}-\d{3}-\d{4}$/)
+  if (isPhoneNumber) {
+    return next()
+  } else {
+    next({
+      status: 400,
+      message: `Please enter mobile number in  xxx-xxx-xxxx format`
+    })
+  }
+}
+
 function timeIsValid(req, res, next) {
   const { reservation_time } = req.body.data;
   const isTime = reservation_time.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/);
@@ -242,6 +255,7 @@ module.exports = {
     hasRequiredProperties,
     dateIsValid,
     timeIsValid,
+    phoneIsValid,
     peopleIsNumber,
     notOnTuesday,
     notInPast,
