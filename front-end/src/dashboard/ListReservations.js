@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"
 
 function ListReservations({ reservations, date, cancelHandler }) {
   const displayReservations = reservations.map((reservation, index) => {
@@ -23,18 +24,16 @@ function ListReservations({ reservations, date, cancelHandler }) {
           <td>
             {reservation.status !== "booked" ? null : (
               <>
-                <a
-                  href={`/reservations/${reservation.reservation_id}/seat`}
-                  className="btn btn-outline-primary mx-1"
-                >
-                  Seat
-                </a>
-                <a
-                  href={`/reservations/${reservation.reservation_id}/edit`}
-                  className="btn btn-outline-primary mx-1"
-                >
+                
+                <Link to={`/reservations/${reservation.reservation_id}/seat`} className="btn btn-outline-primary mx-1" >
+                    Seat
+                </Link>
+                
+
+                <Link to ={`/reservations/${reservation.reservation_id}/edit`} className="btn btn-outline-primary mx-1" >
                   Edit
-                </a>
+                </Link>
+                
                 <button
                   data-reservation-id-cancel={reservation.reservation_id}
                   className="btn btn-danger"
