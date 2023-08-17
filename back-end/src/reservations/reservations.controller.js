@@ -81,7 +81,29 @@ function phoneIsValid(req, res, next) {
   } else {
     next({
       status: 400,
-      message: `Please enter mobile number in  xxx-xxx-xxxx format`
+      message: `Please enter a valid mobile number xxx-xxx-xxxx`
+    })
+  }
+}
+
+function phoneIsNumber(req, res, next) {
+  const { mobile_number } = req.body.data
+  const inputArray = []
+  mobile_number.split("").forEach(character => {
+    if (Number(character)) {
+      inputArray.push(character)
+    }
+  })
+  const testString = inputArray.join('')
+  
+  const isNumber = Number(testString)
+  
+  if (isNumber) {
+    return next()
+  } else {
+    next({
+      status: 400,
+      message: `Please enter a valid mobile number xxx-xxx-xxxx`
     })
   }
 }
@@ -256,6 +278,7 @@ module.exports = {
     dateIsValid,
     timeIsValid,
     phoneIsValid,
+    phoneIsNumber,
     peopleIsNumber,
     notOnTuesday,
     notInPast,
@@ -270,6 +293,8 @@ module.exports = {
     hasRequiredProperties,
     dateIsValid,
     timeIsValid,
+    phoneIsValid,
+    phoneIsNumber,
     peopleIsNumber,
     notOnTuesday,
     notInPast,
