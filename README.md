@@ -5,6 +5,10 @@ Requires Node.js v16.20.
 > The back end is hosted at https://reservation-backend-63rq.onrender.com
 > **Render spins down sites so you may have to vist the backend url first in order to allow the front end to make its api calls**
 
+## Technology
+### Built with:
+- Javascript, JSX, Node.js, React, Express, RESTtil API's, PostgreSQL, Knex, and Bootstrap
+
 # Dashboard
 
 ![Alt text](<images/Screenshot (48).png>)
