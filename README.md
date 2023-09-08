@@ -1,33 +1,37 @@
 Requires Node.js v16.20.
 # Restaurant Reservation System
-
 > This is a full stack application to allow a resturant to make, update, and delete reservations
+> The front end of this repo is hosted at https://reservation-frontend-v0bx.onrender.com
+> The back end is hosted at https://reservation-backend-63rq.onrender.com
+> **Render spins down sites so you may have to vist the backend url first in order to allow the front end to make its api calls**
 
 # Dashboard
-![Alt text](<images/Screenshot (42).png>)
 
-1. The `/dashboard` page will
-   - list all reservations for one date only. (E.g. if the URL is `/dashboard?date=2035-12-30` then send a GET to `/reservations?date=2035-12-30` to list the reservations for that date). The date is defaulted to today, and the reservations are sorted by time.
+![Alt text](<images/Screenshot (48).png>)
+
+The `/dashboard` page will
+   - list all reservations for one date only. The date is defaulted to today, and the reservations are sorted by time.
    - display next, previous, and today buttons that allow the user to see reservations on other dates
    - display any error messages returned from the API
  
 
    - each reservation in the list will:
      - Display a "Seat" button on each reservation.
-     - The "Seat" button must be a link with an `href` attribute that equals `/reservations/${reservation_id}/seat`, so it can be found by the tests.
+
+    ![Alt text](<images/Screenshot (49).png>)
+
    - display a list of all tables, sorted by `table_name`, in another area of the dashboard
-     - Each table will display "Free" or "Occupied" depending on whether a reservation is seated at the table.
-     - The "Free" or "Occupied" text must have a `data-table-id-status=${table.table_id}` attribute, so it can be found by the tests. 
+     - Each table will display "Free" or "Occupied" depending on whether a reservation is seated at the table. 
 
      1. The `/dashboard` page will
    - Display a "Finish" button on each _occupied_ table.
-   - the "Finish" button must have a `data-table-id-finish={table.table_id}` attribute, so it can be found by the tests.
-   - Clicking the "Finish" button will display the following confirmation: "Is this table ready to seat new guests? This cannot be undone." If the user selects "Ok" the system will: - Send a `DELETE` request to `/tables/:table_id/seat` in order to remove the table assignment. The tests do not check the body returned by this request. - The server should return 400 if the table is not occupied. - Refresh the list of tables to show that the table is now available.
+
+   - ![Alt text](<images/Screenshot (50).png>)
+   - Clicking the "Finish" button will display the following confirmation: "Is this table ready to seat new guests? This cannot be undone." tables to show that the table is now available.
    - Clicking the "Cancel" makes no changes.
 
    1. The `/dashboard` page will
    - display the status of the reservation. The default status is "booked"
-     - the status text must have a `data-reservation-id-status={reservation.reservation_id}` attribute, so it can be found by the tests.
    - display the Seat button only when the reservation status is "booked".
    - clicking the Seat button changes the status to "seated" and hides the Seat button.
    - clicking the Finish button associated with the table changes the reservation status to "finished" and removes the reservation from the dashboard.
@@ -70,7 +74,7 @@ Requires Node.js v16.20.
    - display a `Cancel` button that, when clicked, returns the user to the previous page
 
 # Seat Reservation
-
+![Alt text](<images/Screenshot (51).png>)
 1. The `/reservations/:reservation_id/seat` page will
    - have the following required and not-nullable fields:
      - Table number: `<select name="table_id" />`. The text of each option must be `{table.table_name} - {table.capacity}` so the tests can find the options.
@@ -81,7 +85,7 @@ Requires Node.js v16.20.
 
 
 # Search for a reservation by phone number
-
+![Alt text](<images/Screenshot (52).png>)
 . The `/search` page will
    - Display a search box `<input name="mobile_number" />` that displays the placeholder text: "Enter a customer's phone number"
    - Display a "Find" button next to the search box.
@@ -91,19 +95,8 @@ Requires Node.js v16.20.
    - display `No reservations found` if there are no records found after clicking the Find button.
 
 # Edit a reservation   
-
+![Alt text](<images/Screenshot (53).png>)
 1. The `/reservations/:reservation_id/edit` page will display the reservation form with the existing reservation data filled in
    - Only reservations with a status of "booked" can be edited.
    - Clicking the "Submit" button will save the reservation, then displays the previous page.
    - Clicking "Cancel" makes no changes, then display the previous page.
-
-## Installation
-
-1. Fork and clone this repository.
-1. Run `cp ./back-end/.env.sample ./back-end/.env`.
-1. Update the `./back-end/.env` file with the connection URL's to your ElephantSQL database instance.
-1. Run `cp ./front-end/.env.sample ./front-end/.env`.
-1. You should not need to make changes to the `./front-end/.env` file unless you want to connect to a backend at a location other than `http://localhost:5001`.
-1. Run `npm install` to install project dependencies.
-1. Run `npm run start:dev` to start your server in development mode.
-
